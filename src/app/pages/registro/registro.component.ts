@@ -3,7 +3,7 @@ import { UsuarioModule } from '../../models/usuario.module';
 import { NgForm } from '@angular/forms';
 import { AuthService } from 'src/app/services/auth.service';
 import Swal from 'sweetalert2';
-import {Router} from "@angular/router"
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-registro',
@@ -13,6 +13,7 @@ import {Router} from "@angular/router"
 export class RegistroComponent implements OnInit {
 
   usuario: UsuarioModule;
+  recordarme = false;
 
   constructor( private auth: AuthService, private router: Router) { }
 
@@ -20,7 +21,7 @@ export class RegistroComponent implements OnInit {
     this.usuario = new UsuarioModule();
   }
   onSubmit( form: NgForm) {
-    if(form.invalid) { return; }
+    if (form.invalid) { return; }
 
     Swal.fire({
       allowOutsideClick: false,
@@ -28,18 +29,20 @@ export class RegistroComponent implements OnInit {
       text: 'Espere por favor...'
     });
     Swal.showLoading();
-    this.auth.register(this.usuario).subscribe( data =>{
-      console.log(data);
+    this.auth.register(this.usuario).subscribe( data => {
       Swal.close();
-      this.router.navigateByUrl('home')
-    }, (err) =>{
+      if (this.recordarme) {
+        localStorage.setItem('email', this.usuario.email);
+      }
+      this.router.navigateByUrl('home');
+    }, (err) => {
       Swal.fire({
         type: 'error',
         title: 'Error al autenticar',
         text: err.error.error.message
       });
       console.log(err.error.error.message);
-    })
+    });
   }
 
 

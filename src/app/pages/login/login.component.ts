@@ -13,14 +13,19 @@ import { Router } from '@angular/router';
 export class LoginComponent implements OnInit {
 
   usuario = new UsuarioModule();
+  recordarme = false;
 
   constructor( private auth: AuthService, private router: Router) { }
 
   ngOnInit() {
+    if ( localStorage.getItem('email')) {
+      this.usuario.email = localStorage.getItem('email');
+      this.recordarme = true;
+    }
   }
 
-  login( loginForm: NgForm ){
-    if( loginForm.invalid ){ return; }
+  login( loginForm: NgForm ) {
+    if ( loginForm.invalid ) { return; }
 
     Swal.fire({
       allowOutsideClick: false,
@@ -28,10 +33,12 @@ export class LoginComponent implements OnInit {
       text: 'Espere por favor...'
     });
     Swal.showLoading();
-    this.auth.logIn(this.usuario).subscribe(data =>{
-      console.log(data);
+    this.auth.logIn(this.usuario).subscribe(data => {
       Swal.close();
-      this.router.navigateByUrl('home')
+      if (this.recordarme) {
+        localStorage.setItem('email', this.usuario.email);
+      }
+      this.router.navigateByUrl('home');
     }, (err) => {
       Swal.fire({
         type: 'error',

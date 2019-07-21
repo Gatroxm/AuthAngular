@@ -11,7 +11,7 @@ export class AuthService {
   private url ='https://identitytoolkit.googleapis.com/v1';
   private apiKey = 'AIzaSyC2QG5r4Pqg5dXCbxbjImz6YLVpDvB5miQ';
   userToken: string;
-  constructor( private http: HttpClient) { 
+  constructor( private http: HttpClient) {
     this.leerToken();
   }
 
@@ -26,7 +26,9 @@ export class AuthService {
     }));
   }
 
-  logOut() {}
+  logOut() {
+    localStorage.removeItem('token');
+  }
 
   register( user: UsuarioModule) {
     const authData = {
@@ -39,22 +41,44 @@ export class AuthService {
       return data;
     }));
   }
-  
+
   guardarToken( idToken: string ){
 
     this.userToken = idToken;
-
     localStorage.setItem('token', idToken);
+
+    let hoy = new Date();
+    hoy.setSeconds( 3600 );
+
+    localStorage.setItem( 'expira', hoy.getTime().toString() );
 
   }
 
-  leerToken(){
-    if( localStorage.getItem('token') ) {
-      this.userToken = localStorage.getItem('token')
+  leerToken() {
+    if ( localStorage.getItem('token') ) {
+      this.userToken = localStorage.getItem('token');
     } else {
       this.userToken = '';
     }
 
     return this.userToken;
+  }
+
+  estaAutenticado(): boolean {
+    if (this.userToken.length < 2) {
+      return false;
+    }
+    const expira = Number(localStorage.getItem('expira'));
+
+    const expiraDate = new Date();
+
+    expiraDate.setTime(expira);
+
+    if ( expiraDate > new Date() ){
+      return true;
+    } else {
+      return false;
+    }
+
   }
 }
